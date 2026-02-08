@@ -16,14 +16,8 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "mistralai/mistral-7b-instruct:free",
         messages: [
-          {
-            role: "system",
-            content: "You are a helpful college helpdesk assistant."
-          },
-          {
-            role: "user",
-            content: message
-          }
+          { role: "system", content: "You are a helpful college helpdesk assistant." },
+          { role: "user", content: message }
         ]
       }),
     });
@@ -31,7 +25,7 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     const reply =
-      data.choices?.[0]?.message?.content ||
+      data?.choices?.[0]?.message?.content ||
       "Sorry, I couldn’t generate a response.";
 
     res.status(200).json({ reply });
