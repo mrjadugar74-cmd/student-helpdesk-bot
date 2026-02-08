@@ -1,0 +1,18 @@
+{
+  "exams": [
+    { "semester": "3rd Sem", "subject": "DSA", "date": "10 March 2026" },
+    { "semester": "3rd Sem", "subject": "DBMS", "date": "12 March 2026" }
+  ],
+  "fees": "The college fee is ₹85,000 per year. Payment deadline is 25 Feb 2026.",
+  "hostel": "Hostel fee is ₹40,000 per year. Hostel facilities include WiFi, mess, and laundry.",
+  "timings": "College timings are 9:00 AM to 4:30 PM on weekdays.",
+  "contact": "Contact us at: admin@college.edu or call +91-1234567890",
+  "events": [
+    { "name": "Tech Fest", "date": "5 March 2026" },
+    { "name": "Sports Day", "date": "18 March 2026" }
+  ],
+  "timetable": [
+    { "day": "Monday", "subject": "Machine Learning", "time": "10:00 AM" },
+    { "day": "Tuesday", "subject": "DBMS Lab", "time": "1:00 PM" }
+  ]
+}

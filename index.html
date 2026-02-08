@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Student Helpdesk Bot</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+
+body{
+  background:url('./college-photo.jpg') center/cover no-repeat fixed;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+/* APP CONTAINER */
+.app{
+  width:100%;
+  max-width:420px;
+  height:100vh;
+  background:rgba(255,255,255,0.85);
+  backdrop-filter:blur(8px);
+  display:flex;
+  flex-direction:column;
+}
+
+/* HEADER FIXED */
+.header{
+  background:#6366f1;
+  color:white;
+  padding:15px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-shrink:0;
+  justify-content:space-between;
+}
+
+.header-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.header-logo{
+  height:40px;
+  width:40px;
+  border-radius:50%;
+  object-fit:cover;
+  flex-shrink:0;
+}
+
+.header-info{
+  display:flex;
+  flex-direction:column;
+}
+
+.header h2{font-size:18px;font-weight:600}
+.header p{font-size:12px;opacity:0.9}
+
+.clear-btn{
+  background:rgba(255,255,255,0.2);
+  border:none;
+  color:white;
+  padding:8px 14px;
+  border-radius:6px;
+  font-size:12px;
+  font-weight:500;
+  cursor:pointer;
+  transition:all 0.2s;
+  white-space:nowrap;
+  font-family:'Poppins',sans-serif;
+}
+
+.clear-btn:hover{
+  background:rgba(255,255,255,0.3);
+}
+
+.clear-btn:active{
+  transform:scale(0.95);
+}
+
+/* MESSAGES SCROLL ONLY HERE */
+.messages{
+  flex:1;
+  overflow-y:auto;
+  padding:15px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  scroll-behavior:smooth;
+}
+
+/* WHATSAPP STYLE MESSAGE WRAPPER WITH AVATAR */
+.message-row{
+  display:flex;
+  gap:8px;
+  align-items:flex-end;
+}
+
+.message-row.user{
+  flex-direction:row-reverse;
+}
+
+.avatar{
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  background:#e0e0e0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  flex-shrink:0;
+}
+
+/* CHAT BUBBLES WITH TIMESTAMP */
+.msg{
+  max-width:75%;
+  padding:10px 12px 6px;
+  border-radius:12px;
+  font-size:14px;
+  line-height:1.4;
+  position:relative;
+}
+
+.bot .msg{
+  background:white;
+  border-bottom-left-radius:4px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.1);
+}
+
+.user .msg{
+  background:#6366f1;
+  color:white;
+  border-bottom-right-radius:4px;
+}
+
+.msg-time{
+  font-size:10px;
+  opacity:0.6;
+  text-align:right;
+  margin-top:4px;
+  display:block;
+}
+
+/* TELEGRAM STYLE QUICK BUTTONS - REDESIGNED */
+.quick-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin:8px 0;
+  padding:0 40px;
+}
+
+.quick-grid button{
+  background:rgba(255,255,255,0.95);
+  border:1px solid #e0e0e0;
+  padding:12px 10px;
+  border-radius:8px;
+  font-weight:500;
+  cursor:pointer;
+  font-size:13px;
+  transition:all 0.2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.1);
+}
+
+.quick-grid button:hover{
+  background:#f8f9fa;
+  transform:translateY(-1px);
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+
+.quick-grid button:active{
+  transform:translateY(0);
+}
+
+/* INPUT FIXED */
+.input-area{
+  display:flex;
+  padding:12px;
+  gap:10px;
+  border-top:1px solid #ddd;
+  flex-shrink:0;
+  background:white;
+}
+
+textarea{
+  flex:1;
+  padding:10px 14px;
+  border-radius:20px;
+  border:1px solid #ccc;
+  outline:none;
+  resize:none;
+  max-height:100px;
+  font-size:14px;
+  font-family:'Poppins',sans-serif;
+}
+
+button.send{
+  background:#6366f1;
+  border:none;
+  color:white;
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  font-size:18px;
+  cursor:pointer;
+  flex-shrink:0;
+  transition:all 0.2s;
+}
+
+button.send:hover{
+  background:#5558e3;
+  transform:scale(1.05);
+}
+
+button.send:disabled{
+  opacity:0.5;
+  cursor:not-allowed;
+  transform:none;
+}
+
+/* TYPING INDICATOR WITH AVATAR */
+.typing-row{
+  display:none;
+  gap:8px;
+  align-items:flex-end;
+}
+
+.typing-row.show{
+  display:flex;
+}
+
+.typing-indicator{
+  background:white;
+  padding:12px 14px;
+  border-radius:12px;
+  border-bottom-left-radius:4px;
+  width:fit-content;
+  box-shadow:0 1px 2px rgba(0,0,0,0.1);
+}
+
+.typing-dots{
+  display:flex;
+  gap:4px;
+  align-items:center;
+}
+
+.typing-dots span{
+  width:8px;
+  height:8px;
+  background:#999;
+  border-radius:50%;
+  animation:typing 1.4s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(1){animation-delay:0s}
+.typing-dots span:nth-child(2){animation-delay:0.2s}
+.typing-dots span:nth-child(3){animation-delay:0.4s}
+
+@keyframes typing{
+  0%,60%,100%{transform:translateY(0);opacity:0.6}
+  30%{transform:translateY(-8px);opacity:1}
+}
+
+/* MOBILE PERFECT FIT */
+@media(max-width:600px){
+  .app{max-width:100%}
+  .quick-grid{padding:0 30px}
+  
+  .header{
+    padding:12px;
+    gap:8px;
+  }
+  
+  .header-logo{
+    height:36px;
+    width:36px;
+  }
+  
+  .header h2{
+    font-size:16px;
+  }
+  
+  .header p{
+    font-size:11px;
+  }
+  
+  .clear-btn{
+    padding:6px 10px;
+    font-size:11px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <div class="header-left">
+      <img src="logo.png" alt="College Logo" class="header-logo">
+      <div class="header-info">
+        <h2>Student Helpdesk Bot</h2>
+        <p>Always here to help</p>
+      </div>
+    </div>
+    <button class="clear-btn" onclick="clearChat()">Clear Chat</button>
+  </div>
+
+  <div class="messages" id="messages"></div>
+
+  <div class="input-area">
+    <textarea id="userInput" placeholder="Type your message..." rows="1"></textarea>
+    <button class="send" id="sendBtn" onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<script>
+const messages = document.getElementById("messages");
+const userInput = document.getElementById("userInput");
+const sendBtn = document.getElementById("sendBtn");
+
+// Load collegeData
+let collegeData = {};
+fetch('collegeData.json')
+  .then(res => res.json())
+  .then(data => collegeData = data)
+  .catch(err => console.error('Error loading collegeData:', err));
+
+// Create typing indicator with avatar
+const typingRow = document.createElement("div");
+typingRow.className = "typing-row";
+typingRow.id = "typingRow";
+typingRow.innerHTML = `
+  <div class="avatar">🎓</div>
+  <div class="typing-indicator">
+    <div class="typing-dots">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+`;
+
+// Get current time in HH:MM AM/PM format
+function getTime(){
+  const now = new Date();
+  let hours = now.getHours();
+  const mins = now.getMinutes().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
+  return `${hours}:${mins} ${ampm}`;
+}
+
+// Save messages to sessionStorage
+function saveMessages(text, type){
+  let chatHistory = JSON.parse(sessionStorage.getItem('chatHistory') || '[]');
+  chatHistory.push({text, type, time: getTime()});
+  sessionStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+}
+
+// Load previous messages from sessionStorage
+function loadMessages(){
+  const chatHistory = JSON.parse(sessionStorage.getItem('chatHistory') || '[]');
+  chatHistory.forEach(msg => {
+    addMsg(msg.text, msg.type, msg.time, false);
+  });
+}
+
+// Clear chat history
+function clearChat(){
+  // Clear sessionStorage
+  sessionStorage.removeItem('chatHistory');
+  
+  // Clear UI
+  messages.innerHTML = '';
+  
+  // Show welcome message and quick buttons again
+  addMsg("Hi! 👋 I'm your Student Helpdesk Bot. How can I help you today?", "bot");
+  showQuickButtons();
+  
+  // Re-add typing indicator element
+  if(!document.getElementById("typingRow")){
+    messages.appendChild(typingRow);
+  }
+}
+
+// Add message with avatar and timestamp
+function addMsg(text, type, time, save=true){
+  const row = document.createElement("div");
+  row.className = "message-row " + type;
+  
+  const avatar = document.createElement("div");
+  avatar.className = "avatar";
+  avatar.innerText = type === "bot" ? "🎓" : "🙂";
+  
+  const msgDiv = document.createElement("div");
+  msgDiv.className = "msg";
+  msgDiv.innerHTML = `${text}<span class="msg-time">${time || getTime()}</span>`;
+  
+  row.appendChild(avatar);
+  row.appendChild(msgDiv);
+  messages.appendChild(row);
+  
+  scrollToBottom();
+  
+  if(save) saveMessages(text, type);
+}
+
+function scrollToBottom(){
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function showTyping(){
+  if(!document.getElementById("typingRow")){
+    messages.appendChild(typingRow);
+  }
+  typingRow.classList.add("show");
+  scrollToBottom();
+}
+
+function hideTyping(){
+  typingRow.classList.remove("show");
+}
+
+function showQuickButtons(){
+  const grid = document.createElement("div");
+  grid.className = "quick-grid";
+  grid.innerHTML = `
+    <button onclick="quick('Exam dates')">📅 Exam Dates</button>
+    <button onclick="quick('Fee details')">💰 Fee Details</button>
+    <button onclick="quick('Events')">🎉 Events</button>
+    <button onclick="quick('Timetable')">🗓️ Timetable</button>
+  `;
+  messages.appendChild(grid);
+  scrollToBottom();
+}
+
+function quick(text){
+  userInput.value = text;
+  sendMessage();
+}
+
+// Check if message matches keywords in collegeData
+function checkLocalKeywords(text){
+  const lower = text.toLowerCase();
+  
+  if(lower.includes('fee')){
+    return collegeData.fees;
+  }
+  else if(lower.includes('hostel')){
+    return collegeData.hostel;
+  }
+  else if(lower.includes('timing') || lower.includes('hours')){
+    return collegeData.timings;
+  }
+  else if(lower.includes('contact')){
+    return collegeData.contact;
+  }
+  else if(lower.includes('exam')){
+    return "Exams follow the academic calendar.";
+  }
+  else if(lower.includes('placement')){
+    return "Placements are handled by the placement cell.";
+  }
+  else if(lower.includes('attendance')){
+    return "Minimum 75% attendance is required.";
+  }
+  
+  return null; // No keyword match
+}
+
+// Handle Enter and Shift+Enter
+userInput.addEventListener('keydown', function(e){
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+// Auto-resize textarea
+userInput.addEventListener('input', function(){
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+});
+
+async function sendMessage(){
+  const text = userInput.value.trim();
+  if(!text) return;
+
+  // Disable input
+  userInput.disabled = true;
+  sendBtn.disabled = true;
+
+  addMsg(text, "user");
+  userInput.value = "";
+  userInput.style.height = 'auto';
+
+  // Show typing animation
+  showTyping();
+
+  // First check local keywords
+  const localReply = checkLocalKeywords(text);
+  
+  if(localReply){
+    // Keyword matched, use local reply
+    await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 500));
+    hideTyping();
+    addMsg(localReply, "bot");
+    
+    // Re-enable input
+    userInput.disabled = false;
+    sendBtn.disabled = false;
+    userInput.focus();
+  }
+  else{
+    // No keyword match, call API
+    try{
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: text})
+      });
+      const data = await res.json();
+      
+      // Simulate realistic delay
+      await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 500));
+      
+      hideTyping();
+      addMsg(data.reply, "bot");
+    }catch{
+      hideTyping();
+      addMsg("Server error. Try again.", "bot");
+    }finally{
+      // Re-enable input
+      userInput.disabled = false;
+      sendBtn.disabled = false;
+      userInput.focus();
+    }
+  }
+}
+
+// Initialize on page load
+window.onload = () => {
+  // Load previous messages
+  loadMessages();
+  
+  // If no previous messages, show welcome
+  if(!sessionStorage.getItem('chatHistory')){
+    addMsg("Hi! 👋 I'm your Student Helpdesk Bot. How can I help you today?", "bot");
+  }
+  
+  // Always show quick buttons if not already present
+  if(!document.querySelector('.quick-grid')){
+    showQuickButtons();
+  }
+  
+  // Auto-focus input
+  userInput.focus();
+};
+</script>
+
+</body>
+</html>
