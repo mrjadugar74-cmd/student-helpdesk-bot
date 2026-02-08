@@ -1,47 +1,37 @@
-import fs from "fs";
-import path from "path";
-
-export default function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).end();
+    return res.status(405).json({ reply: "Method not allowed" });
   }
 
-  // Import data from collegeData.json
-  const filePath = path.join(process.cwd(), "collegeData.json");
-  const collegeData = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  const { message } = req.body;
 
-  // Get message and convert to lowercase
-  const message = req.body.message.toLowerCase();
-  
-  let reply = "";
+  const HF_API_KEY = process.env.HF_API_KEY;
 
-  // Reply based on keywords
-  if (message.includes("fee")) {
-    reply = collegeData.fees;
-  }
-  else if (message.includes("hostel")) {
-    reply = collegeData.hostel;
-  }
-  else if (message.includes("timing") || message.includes("hours")) {
-    reply = collegeData.timings;
-  }
-  else if (message.includes("contact")) {
-    reply = collegeData.contact;
-  }
-  else if (message.includes("exam")) {
-    reply = "Exams follow the academic calendar.";
-  }
-  else if (message.includes("placement")) {
-    reply = "Placements are handled by the placement cell.";
-  }
-  else if (message.includes("attendance")) {
-    reply = "Minimum 75% attendance is required.";
-  }
-  else {
-    reply = "I'm not sure about that. Please contact the admin.";
-  }
+  try {
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/google/flan-t5-large",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${HF_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputs: `You are a helpful college assistant. Answer this student question clearly: ${message}`,
+        }),
+      }
+    );
 
-  res.status(200).json({ reply });
+    const data = await response.json();
+
+    let reply = "Sorry, I couldn’t generate a response.";
+
+    if (data && data[0] && data[0].generated_text) {
+      reply = data[0].generated_text;
+    }
+
+    res.status(200).json({ reply });
+  } catch (error) {
+    res.status(500).json({ reply: "Server error. Try again." });
+  }
 }
-
-
