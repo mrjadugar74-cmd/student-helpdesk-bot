@@ -5,7 +5,8 @@ export default async function handler(req, res) {
 
   const { message } = req.body;
 
-  const HF_API_KEY = process.env.HF_API_KEY;
+  const HF_API_KEY = process.env.HUGGINGFACE_API_KEY;
+
 
   try {
     const response = await fetch(
